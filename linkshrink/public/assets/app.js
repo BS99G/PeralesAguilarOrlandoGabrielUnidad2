@@ -2,38 +2,56 @@
         let totalClicks = 0;
         const links = [];
 
-        document.getElementById('urlForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const urlInput = document.getElementById('urlInput');
-            const originalUrl = urlInput.value.trim();
-            
-            if (!originalUrl) return;
-            
-            // Generate short URL
-            const shortCode = generateShortCode();
-            const shortUrl = `https://lnk.sh/${shortCode}`;
-            
-            // Store link data
-            const linkData = {
-                id: Date.now(),
-                original: originalUrl,
-                short: shortUrl,
-                clicks: 0,
-                created: new Date().toLocaleString('es-ES')
-            };
-            
-            links.unshift(linkData);
-            linkCounter++;
-            
-            // Update UI
-            updateStats();
-            showResult(shortUrl);
-            updateRecentLinks();
-            
-            // Clear input
-            urlInput.value = '';
+    document.getElementById('urlForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const urlInput = document.getElementById('urlInput');
+    const originalUrl = urlInput.value.trim();
+
+    if (!originalUrl) return;
+
+    try {
+        const response = await fetch('api/create.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ url: originalUrl })
         });
+
+        const data = await response.json();
+
+        if (data.error) {
+            alert('Error: ' + data.error);
+            return;
+        }
+
+        // El resto es simulado, ya que el backend no devuelve estadísticas
+        linkCounter++;
+
+        // Update UI
+        updateStats();
+        showResult(data.short_url);
+
+        // Añadir a la lista de "links" (solo para la UI)
+        const linkData = {
+            id: Date.now(),
+            original: originalUrl,
+            short: data.short_url,
+            clicks: 0,
+            created: new Date().toLocaleString('es-ES')
+        };
+        links.unshift(linkData);
+        updateRecentLinks();
+
+        // Clear input
+        urlInput.value = '';
+
+    } catch (error) {
+        console.error('Error al acortar:', error);
+        alert('Ocurrió un error. Intenta de nuevo.');
+    }
+    });
 
         document.getElementById('copyBtn').addEventListener('click', function() {
             const shortUrl = document.getElementById('shortUrl');
