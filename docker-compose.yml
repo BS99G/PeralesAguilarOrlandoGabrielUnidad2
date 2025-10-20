@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    container_name: linkshrink_web
+    ports:
+      - "8080:80"
+    volumes:
+      # Monta el código local para desarrollo en vivo
+      # PERO excluye la base de datos para usar la del contenedor
+      - ./public:/var/www/html
+      - db_data:/var/www/db
+
+volumes:
+  db_data:
