@@ -1,0 +1,12 @@
+RewriteEngine On
+RewriteBase /
+
+# Si la petición no es un archivo o directorio existente
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Y no es la API
+RewriteCond %{REQUEST_URI} !^/api/
+
+# Redirige todo lo demás a index.php para manejar la redirección o mostrar el front
+RewriteRule ^(.*)$ index.php?code=$1 [L,QSA]
