@@ -1,3 +1,35 @@
+<?php
+// --- INICIO BLOQUE DE REDIRECCIÓN ---
+if (isset($_GET['code']) && !empty($_GET['code'])) {
+    $shortCode = htmlspecialchars($_GET['code']);
+    $dbPath = __DIR__ . '/../db/database.sqlite';
+
+    try {
+        $pdo = new PDO('sqlite:' . $dbPath);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $stmt = $pdo->prepare("SELECT original_url FROM links WHERE short_code = ?");
+        $stmt->execute([$shortCode]);
+        $link = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($link) {
+            // Incrementar contador de clics (opcional)
+            $stmt_click = $pdo->prepare("UPDATE links SET clicks = clicks + 1 WHERE short_code = ?");
+            $stmt_click->execute([$shortCode]);
+
+            // Redirección permanente
+            header('Location: ' . $link['original_url'], true, 301);
+            exit;
+        } else {
+            // Opcional: manejar código no encontrado
+            // Por ahora, simplemente cargará la página principal
+        }
+    } catch (PDOException $e) {
+        // No hacer nada, solo cargar la página principal
+    }
+}
+// --- FIN BLOQUE DE REDIRECCIÓN ---
+?>
 <!DOCTYPE html>
 <html lang="es" class="h-full">
 <head>
